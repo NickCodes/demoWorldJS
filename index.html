@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<link rel="stylesheet" type="text/css" href="assets/styles/main.css">
+	</head>
+  
+	<body>
+		<div id="3jsContainer" class="3jsContainer"></div>
+
+		<script src="assets/lib/jquery-1.11.1.min.js"></script>
+		<script src="assets/lib/3.js"></script>
+		<script src="assets/lib/PointerLockControls.js"></script>
+		<script src="assets/lib/stats.min.js"></script>
+		<script src="assets/lib/dat.gui.js"></script>
+		<script src="assets/scripts/rafShim.js"></script>
+		
+		<script src="assets/scripts/world.js"></script>
+		<script src="assets/scripts/geometry.js"></script>
+		<script src="assets/scripts/camera.js"></script>
+		<script src="assets/scripts/player.js"></script>
+		<script src="assets/scripts/keyboard.js"></script>
+		<script src="assets/scripts/state.js"></script>
+		<script src="assets/scripts/debug.js"></script>
+		<script src="assets/scripts/GUI.js"></script>
+
+		<footer>
+			<script>
+
+				window.onload = function() {
+				
+					/*// dat.GUI setup
+					var text = {message:1};
+					var gui = new dat.GUI();
+					gui.add(text, 'message');
+					*/
+		
+					// Setup the game states
+
+					// TODO - Integration with manager? This is part of an event queue push/pop scheme 
+					var newState={
+						name:"new state name",
+						stateCode: 1,
+						before: function(){ alert('before'); },
+						after: function(){ alert('after'); }
+					};
+					var newState2={
+						name:"another state",
+						stateCode: 2,
+						before: function(){ alert('before!!!!!!!!!!!!!'); },
+						after: function(){ alert('after!!!!!!!!!!!!!'); }
+					};
+					
+					world.init();
+					world.renderer.setSize(world.viewportWidth, world.viewportHeight)	;
+					cameraManager.init();
+					debugObject.init();
+					keyboard.init();
+					
+					player.init();
+					player.object.position.y = 4;	// TODO
+					
+					stateManager.addState(newState);
+					stateManager.addState(newState2);
+					stateManager.init();
+				 
+					var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+					directionalLight.position.set(30, 100, 0 );
+					world.scene.add( directionalLight );
+				 			
+					// Camera system (FPS movement) - use pointerlock instead
+					/*
+					cameraManager.camera.position = player.object.position;
+					cameraManager.camera.up = new THREE.Vector3(0,1,0);
+					cameraManager.controls = new THREE.FirstPersonControls( cameraManager.camera, world.container );
+					cameraManager.controls.lookSpeed = 0.4;
+					cameraManager.controls.movementSpeed = 20;
+					cameraManager.controls.noFly = true;
+					cameraManager.controls.lookVertical = true;
+					cameraManager.controls.constrainVertical = true;
+					cameraManager.controls.verticalMin = 1.0;
+					cameraManager.controls.verticalMax = 2.0;
+					cameraManager.controls.lon = -150;
+					cameraManager.controls.lat = 120;
+					world.scene.add(cameraManager.controls);
+					*/
+
+					// Camera system pointerlock FPS
+					cameraManager.controls = new THREE.PointerLockControls( cameraManager.camera );
+					world.scene.add( cameraManager.controls.getObject() );
+					
+					// Collision geometry
+					world.obstacles = [];
+
+					// load JSON scene
+					var ssmod = geometryManager.loadModelJSON('assets/models/interior.js');
+
+
+					// POINTERLOCK TODO - this and potentially the keyboard object should be rolled into an input manager
+					// Pointer lock and mouse/keyboard callbacks
+
+					var havePointerLock = 'pointerLockElement' in document ||
+					'moz	PointerLockElement' in document ||
+					'webkitPointerLockElement' in document;
+
+					if (havePointerLock){
+						world.container.requestPointerLock = world.container.requestPointerLock ||
+							world.container.mozRequestPointerLock ||
+							world.container.webkitRequestPointerLock;
+						
+						// Ask the browser to lock the pointer
+						jQuery(world.container).on('click', function(){ world.container.requestPointerLock(); });
+					}
+										
+					changeCallback = function(){
+						if (document.pointerLockElement === world.container ||
+							document.mozPointerLockElement === world.container ||
+							document.webkitPointerLockElement === world.container) {
+							document.addEventListener("mousemove", this.moveCallback, false);
+						} else {
+							document.removeEventListener("mousemove", this.moveCallback, false);
+						}
+					};
+					
+					moveCallback = function(e) {
+						/*
+						var movementX = e.movementX ||
+								e.mozMovementX          ||
+								e.webkitMovementX       ||
+								0,
+						movementY = e.movementY ||
+								e.mozMovementY      ||
+								e.webkitMovementY   ||
+								0;
+								
+						cameraManager.camera.rotation.y += movementX / 100;
+						cameraManager.camera.rotation.x += movementY / 100;
+						console.log(movementX, movementY);								
+						*/							document.addEventListener("mousemove", this.moveCallback, false);
+					};
+
+					document.addEventListener('pointerlockchange', changeCallback, false);
+					document.addEventListener('mozpointerlockchange', changeCallback, false);
+					document.addEventListener('webkitpointerlockchange', changeCallback, false);
+					document.addEventListener("mousemove", this.moveCallback, false);
+					
+									
+					// Animation loop /////////////////////////////////////////////////////////////////////////////////
+					(function animloop(){ 
+						
+						requestAnimFrame(animloop);
+						var timedelta = world.gameClock.getDelta();
+
+						player.object.position = cameraManager.camera.position;
+						//player.object.position.y = 5;
+						player.collisionCheck();
+
+						
+
+						// Pointer lock update
+						cameraManager.controls.update(timedelta);
+						
+						// Update fps / stats
+						debugObject.stats.update();
+						
+						/*
+						//	Example: create a new set of control mappings
+						 	standardControls = function() {
+								standardControls = new keyController;
+						 		standardControls.addKeyListener('W', function(){ player.moveUp(new vector3(1,0,0)); });	// Anonymous
+						 		standardControls.addKeyListener('A', standardControls.moveLeft );												// this object (or another obj)
+						 		standardControls.addKeyListener('S', standardControls.moveBack );												// this object (or another obj)
+						 		standardControls.addKeyListener('D', standardControls.moveLeft );												// this object (or another obj)
+								standardControls.moveLeft = function(e){ player.move(new vector3(1,0,0)); }						// callback for above
+								standardControls.moveRight = function(e){ player.move(new vector3(1,0,0)); }					// callback for above
+								standardControls.moveUp = function(e){ player.move(new vector3(1,0,0)); }							// callback for above
+								standardControls.moveBack = function(e){ player.move(new vector3(1,0,0)); }						// callback for above						
+
+								standardControls.layout = [];
+
+								// Add key and callback to the layout
+								standardControls.addKeyListener = function(key, callback){
+									standardControls.layout.push([key, callback]);	
+								};								
+
+								return standardControls;
+							}
+						*/
+						
+						if (keyboard.isPressed('t')){	player.object.position.y += .08;	}	//up
+						if (keyboard.isPressed('u')){	player.object.position.y -= .08;	}	//down
+					
+						// Todo:
+						// Movement needs to be in the direction of the camera lookat vector, not static x and z vectors
+						if (keyboard.isPressed('w')){	player.object.position.x -= .2;	}
+						if (keyboard.isPressed('a')){	player.object.position.z += .2;	}
+						if (keyboard.isPressed('s')){	player.object.position.x += .2;	}
+						if (keyboard.isPressed('d')){	player.object.position.z -= .2;	}
+
+						// Render and get another frame
+						world.renderer.render(world.scene, cameraManager.camera);
+					})();
+				};
+			</script>
+		</footer>
+		
+	</body>
+  
+</html>
+

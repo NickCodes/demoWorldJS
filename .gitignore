@@ -1,0 +1,17 @@
+# Ignore all except index, gulp and /assets/scripts and assets/libs
+
+/*
+!.gitignore
+!gulpfile.js
+!package.json
+!index.html
+
+!/assets/
+/assets/models/
+/assets/images/
+/assets/lib/
+
+!/assets/styles
+!/assets/scripts
+ 
+ 
