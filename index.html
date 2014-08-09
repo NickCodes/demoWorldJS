@@ -50,8 +50,8 @@
 				debugObject.init();
 				keyboard.init();
 				
-				//player.init();
-				//player.object.position.y = 4;	// TODO
+				player.init();
+				cameraManager.camera.position.y = -5;	// TODO debug
 				
 				stateManager.addState(newState);
 				stateManager.addState(newState2);
@@ -60,6 +60,8 @@
 				// Camera system pointerlock FPS
 				cameraManager.controls = new THREE.PointerLockControls( cameraManager.camera );
 				world.scene.add( cameraManager.controls.getObject() );
+				
+				
 				
 				// Collision geometry
 				world.obstacles = [];
@@ -100,7 +102,7 @@
 								
 				// Animation loop /////////////////////////////////////////////////////////////////////////////////
 				(function animloop(){ 
-					
+				
 					requestAnimFrame(animloop);
 					var timedelta = world.gameClock.getDelta();
 					// Pointer lock update
@@ -108,6 +110,8 @@
 					// Update fps / stats
 					debugObject.stats.update();
 
+					player.collisionCheck();	// Camera collision check
+					
 					/* Old player control code - using camera as player now 
 					// TODO - remove
 					player.object.position = cameraManager.camera.position;
