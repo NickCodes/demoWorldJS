@@ -34,8 +34,6 @@ var geometryManager = function(){
 		jsonLoader.load( path, function(geometry) {
 			var material = new THREE.MeshLambertMaterial({ color: 0x79D75A });
 			loadedGeometry = new THREE.Mesh( geometry, material );
-			scale = new THREE.Vector3(1,1,1);
-			loadedGeometry.scale.set(3,1,3);
 			world.scene.add( loadedGeometry );
 		
 			// DEBUG - automatically push mesh onto collideable array

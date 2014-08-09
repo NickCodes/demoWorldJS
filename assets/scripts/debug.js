@@ -14,9 +14,10 @@ var debugObject = function(window){
 		debugObject.stats.domElement.style.zIndex = 100;
 		world.container.appendChild( debugObject.stats.domElement );
 		
-		// Axis indicator
+		// Axis indicator todo - add to debug object
 		var axisHelper = new THREE.AxisHelper( 50 );
 		world.scene.add( axisHelper );
+		
 	}
 
 	return debugObject;

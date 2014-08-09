@@ -1,3 +1,28 @@
+/* Pseudocode for key control mappings
+	//	Example: create a new set of control mappings
+		standardControls = function() {
+			standardControls = new keyController;
+			standardControls.addKeyListener('W', function(){ player.moveUp(new vector3(1,0,0)); });	// Anonymous
+			standardControls.addKeyListener('A', standardControls.moveLeft );												// this object (or another obj)
+			standardControls.addKeyListener('S', standardControls.moveBack );												// this object (or another obj)
+			standardControls.addKeyListener('D', standardControls.moveLeft );												// this object (or another obj)
+			standardControls.moveLeft = function(e){ player.move(new vector3(1,0,0)); }						// callback for above
+			standardControls.moveRight = function(e){ player.move(new vector3(1,0,0)); }					// callback for above
+			standardControls.moveUp = function(e){ player.move(new vector3(1,0,0)); }							// callback for above
+			standardControls.moveBack = function(e){ player.move(new vector3(1,0,0)); }						// callback for above						
+
+			standardControls.layout = [];
+
+			// Add key and callback to the layout
+			standardControls.addKeyListener = function(key, callback){
+				standardControls.layout.push([key, callback]);	
+			};								
+
+			return standardControls;
+		}
+	*/
+
+
 var keyboard = function(window) {
 		var keyboard = window.keyboard || {};
 		keyboard.keyAllowed = {};

@@ -15,6 +15,12 @@ var world = function(window){
 		world.container.appendChild(world.renderer.domElement);
 		console.log('World ready');
 	};
+	
+	world.defaults = function(){
+		world.defaultDirectionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+		world.defaultDirectionalLight.position.set(30, 100, 0 );
+		world.scene.add( world.defaultDirectionalLight );
+	};
 
 	// Clock to keep track of running time and time delta per frame
 	world.gameClock = new THREE.Clock;
