@@ -69,6 +69,20 @@ window.player = function(window) {
 		// Get FPS controls object (camera) position (will not work with cameraManager.camera.position)
 		var playerPosition = cameraManager.controls.getObject().position;
 		
+		// Corrected collision vectors based on camera orientation
+		// In order to preserve "fwd, back, left, right" orientation, we have to set a vector in local camera space,
+		// then transform this based on the world matrix. Then create rays based on fwd, back, left, right based on the new vector
+		// Otherwise, turning 180 degrees collides BACK when you move FWD and left when you move right, etc
+		
+		// Camera direction vector, locally always 0,0,-1
+		var pLocal = new THREE.Vector3( 0, 0, -1 );
+		var pWorld = pLocal.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
+		// Subtract camera position from world vector and normalize
+		var dir = pWorld.sub( cameraManager.controls.getObject().position ).normalize();
+		
+		// TODO - Create rays for THIS test based on the new vector information above, then run collision loop
+		//
+		
     for (i = 0; i < player.collisionRays.length; i += 1) {
 			player.caster = new THREE.Raycaster();
 			
@@ -79,13 +93,14 @@ window.player = function(window) {
 			var pos = new THREE.Vector3( playerPosition.x, playerPosition.y-7, playerPosition.z ); 
 			player.caster.set(pos, player.collisionRays[i][1].normalize());
 			
+			//Get vetctor of movement
+			//var vector = new THREE.Vector3();
+			//console.log(cameraManager.controls.getDirection( vector ));
+			
 			var collisions = player.caster.intersectObjects(world.obstacles);
 				
 			if (collisions.length && collisions[0].distance < distance ) {
 			
-				console.log('Collision detected via ' + player.collisionRays[i][0] + ' implementation needed to affect camera movement via FPScontrols!');
-			
-				/*
 				switch(player.collisionRays[i][0]){
 					case 'forward':
 						console.log('collision detected ' + player.collisionRays[i][0]);
@@ -108,7 +123,6 @@ window.player = function(window) {
 						player.object.position.y += .1 ;
 						break;
 				}
-				*/
 			
 			} // End collision handling
 		} // End for each ray check loop
