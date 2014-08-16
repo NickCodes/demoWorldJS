@@ -82,7 +82,16 @@ window.player = function(window) {
 		
 		// TODO - Create rays for THIS test based on the new vector information above, then run collision loop
 		//
-		
+			// An array of vectors (rays) to use for collision detection against the map and other geometry
+		player.collisionRays = [
+				['up', new THREE.Vector3(0, -1, 0)],			// up
+				['down', new THREE.Vector3(0, -1, 0)],		// down
+				['left', new THREE.Vector3(-1, 0, 0)],		// left
+				['right', new THREE.Vector3(1, 0, 0)],		// right
+				['forward', new THREE.Vector3(0, 0, 1)],	// fwd
+				['back', new THREE.Vector3(0, 0, -1)]			// back
+			];
+			
     for (i = 0; i < player.collisionRays.length; i += 1) {
 			player.caster = new THREE.Raycaster();
 			
