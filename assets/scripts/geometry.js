@@ -9,11 +9,6 @@ var geometryManager = function(){
 	
 	geometryManager.getObstacles = function(){
 		var results = [];
-		
-		// DEBUG - REMOVE
-		//results.push(world.scene.getObjectByName('ground'));
-		
-		console.log('009');
 		// Get any object in geometryList with collideable = true and add its mesh to the obstacles array for collision checking
 		console.log(geometryManager.geometryList.length);
 		if (geometryManager.geometryList.length){
@@ -28,13 +23,14 @@ var geometryManager = function(){
 	}
 	
 	// Public JSON loader
-	// 
 	geometryManager.loadModelJSON = function(path) {
 		var jsonLoader = new THREE.JSONLoader();
 		jsonLoader.load( path, function(geometry) {
 			var material = new THREE.MeshLambertMaterial({ color: 0x79D75A });
 			loadedGeometry = new THREE.Mesh( geometry, material );
 			world.scene.add( loadedGeometry );
+		
+			loadedGeometry.scale.set(4,4,4);
 		
 			// DEBUG - automatically push mesh onto collideable array
 			geometryManager.geometryList.push(loadedGeometry);

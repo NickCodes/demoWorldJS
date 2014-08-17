@@ -26,7 +26,43 @@
 			<script>
 
 				window.onload = function() {
-
+				
+				world.init();
+				world.defaults();	// Create default lights, etc -- TODO use dynamically loaded scene info
+				world.renderer.setSize(world.viewportWidth, world.viewportHeight)	;
+				cameraManager.init();
+				debugObject.init();
+				keyboard.init();
+				player.init();
+				stateManager.init();
+				cameraManager.controls = new THREE.PointerLockControls( cameraManager.camera );
+				world.scene.add( cameraManager.controls.getObject() );
+				
+				// POINTERLOCK TODO - this and potentially the keyboard object should be rolled into an input manager
+				var havePointerLock = 'pointerLockElement' in document ||
+				'moz	PointerLockElement' in document ||
+				'webkitPointerLockElement' in document;
+				if (havePointerLock){
+					world.container.requestPointerLock = world.container.requestPointerLock ||
+						world.container.mozRequestPointerLock ||
+						world.container.webkitRequestPointerLock;
+					// Ask the browser to lock the pointer
+					jQuery(world.container).on('click', function(){ world.container.requestPointerLock(); cameraManager.controls.enabled=1; });
+				}
+				changeCallback = function(){
+					if (document.pointerLockElement === world.container ||
+						document.mozPointerLockElement === world.container ||
+						document.webkitPointerLockElement === world.container) {
+						document.addEventListener("mousemove", this.moveCallback, false);
+					} else {
+						document.removeEventListener("mousemove", this.moveCallback, false);
+					}
+				};
+				document.addEventListener('pointerlockchange', changeCallback, false);
+				document.addEventListener('mozpointerlockchange', changeCallback, false);
+				document.addEventListener('webkitpointerlockchange', changeCallback, false);
+				document.addEventListener("mousemove", this.moveCallback, false);
+				
 				// Setup the game states
 				// TODO - Integration with manager? This is part of an event queue push/pop scheme 
 				var newState={
@@ -41,85 +77,13 @@
 					before: function(){ alert('before!!!!!!!!!!!!!'); },
 					after: function(){ alert('after!!!!!!!!!!!!!'); }
 				};
-					
-				world.init();
-				// Create default lights, etc -- TODO use dynamically loaded scene info
-				world.defaults();	
-				world.renderer.setSize(world.viewportWidth, world.viewportHeight)	;
-				cameraManager.init();
-				debugObject.init();
-				keyboard.init();
-				
-				player.init();
-				cameraManager.camera.position.y = -5;	// TODO debug
-				
 				stateManager.addState(newState);
 				stateManager.addState(newState2);
-				stateManager.init();
-
-				// Camera system pointerlock FPS
-				cameraManager.controls = new THREE.PointerLockControls( cameraManager.camera );
-				world.scene.add( cameraManager.controls.getObject() );
 				
-				
-				
-				/*	TODO - visually map collision rays for easier understanding
-				  function v(x,y,z){ 
-						return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
-					}
-					
-					var lineGeo = new THREE.Geometry();
-					lineGeo.vertices.push(
-						v(-50, 0, 0), v(50, 0, 0),
-						v(0, -50, 0), v(0, 50, 0),
-						v(0, 0, -50), v(0, 0, 50)
-					);
-					var lineMat = new THREE.LineBasicMaterial({
-						color: 0x000000, lineWidth: 1});
-					var line = new THREE.Line(lineGeo, lineMat);
-					line.type = THREE.Lines;
-					scene.add(line);
-				*/
-				
-				
-				
-				
-				// Collision geometry
 				world.obstacles = [];
+				cameraManager.camera.position.y = -8;	// TODO debug
+				var ssmod = geometryManager.loadModelJSON('assets/models/scene.js');
 
-				// load JSON scene
-				var ssmod = geometryManager.loadModelJSON('assets/models/interior.js');
-
-				// POINTERLOCK TODO - this and potentially the keyboard object should be rolled into an input manager
-				// Pointer lock and mouse/keyboard callbacks
-				var havePointerLock = 'pointerLockElement' in document ||
-				'moz	PointerLockElement' in document ||
-				'webkitPointerLockElement' in document;
-
-				if (havePointerLock){
-					world.container.requestPointerLock = world.container.requestPointerLock ||
-						world.container.mozRequestPointerLock ||
-						world.container.webkitRequestPointerLock;
-					
-					// Ask the browser to lock the pointer
-					jQuery(world.container).on('click', function(){ world.container.requestPointerLock(); cameraManager.controls.enabled=1; });
-				}
-									
-				changeCallback = function(){
-					if (document.pointerLockElement === world.container ||
-						document.mozPointerLockElement === world.container ||
-						document.webkitPointerLockElement === world.container) {
-						document.addEventListener("mousemove", this.moveCallback, false);
-					} else {
-						document.removeEventListener("mousemove", this.moveCallback, false);
-					}
-				};
-
-				document.addEventListener('pointerlockchange', changeCallback, false);
-				document.addEventListener('mozpointerlockchange', changeCallback, false);
-				document.addEventListener('webkitpointerlockchange', changeCallback, false);
-				document.addEventListener("mousemove", this.moveCallback, false);
-				
 								
 				// Animation loop /////////////////////////////////////////////////////////////////////////////////
 				(function animloop(){ 
@@ -132,25 +96,6 @@
 					// Update fps / stats
 					debugObject.stats.update();
 
-					
-					
-					/* Old player control code - using camera as player now 
-					// TODO - remove
-					player.object.position = cameraManager.camera.position;
-					player.object.position.y = 5;
-					player.collisionCheck();
-					
-					if (keyboard.isPressed('t')){	player.object.position.y += .08;	}	//up
-					if (keyboard.isPressed('u')){	player.object.position.y -= .08;	}	//down
-				
-					// Todo:
-					// Movement needs to be in the direction of the camera lookat vector, not static x and z vectors
-					if (keyboard.isPressed('t')){	player.object.position.x -= .2;	}
-					if (keyboard.isPressed('f')){	player.object.position.z += .2;	}
-					if (keyboard.isPressed('g')){	player.object.position.x += .2;	}
-					if (keyboard.isPressed('h')){	player.object.position.z -= .2;	}
-					*/
-					
 					// Render and get another frame
 					world.renderer.render(world.scene, cameraManager.camera);
 				})();

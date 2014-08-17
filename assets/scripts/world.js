@@ -3,8 +3,8 @@ var world = function(window){
 
 	if (!('initialState' in world)){
 		world.initialState = true;
-		world.viewportWidth = 800;
-		world.viewportHeight = 600;
+		world.viewportWidth = 1440;
+		world.viewportHeight = 990;
 		console.log('Initial state, container and render element created');
 	}
 
@@ -18,8 +18,12 @@ var world = function(window){
 	
 	world.defaults = function(){
 		world.defaultDirectionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-		world.defaultDirectionalLight.position.set(30, 100, 0 );
+		world.defaultDirectionalLight.position.set(0, -11, 0 );
 		world.scene.add( world.defaultDirectionalLight );
+		
+		world.defaultDirectionalLight2 = new THREE.DirectionalLight( 0xffffff, 1 );
+		world.defaultDirectionalLight2.position.set(0, 500, 500 );
+		world.scene.add( world.defaultDirectionalLight2 );
 	};
 
 	// Clock to keep track of running time and time delta per frame

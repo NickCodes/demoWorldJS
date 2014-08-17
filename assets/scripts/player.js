@@ -1,72 +1,19 @@
 window.player = function(window) {
 	var player = window.player || {};
 	
-	var lastMovementDirection='';
-	
 	if ( !('playerSpawned' in player )){	
 		player.playerSpawned = true;						// Init flag		
 	}
 
 	player.init = function() {
-		// Player stats
 		player.health = 1;
-		
-		/* Bounding box removed, simple raycast from camera position used for collision detection
-		player.x = 0;
-		player.y = 0;
-		player.z = 0;
-
-		// Player bounding box
-		var cubeoid = new THREE.BoxGeometry(2,5,2);
-		var material = new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 1, wireframe:true});
-		player.object = new THREE.Mesh( cubeoid, material );
-		world.scene.add(player.object);
-		*/
-		
-		/*
-		// An array of vectors (rays) to use for collision detection against the map and other geometry
-		player.collisionRays = [
-				['up', new THREE.Vector3(0, -1, 0)],			// up
-				['down', new THREE.Vector3(0, -1, 0)],		// down
-				['left', new THREE.Vector3(-1, 0, 0)],		// left
-				['right', new THREE.Vector3(1, 0, 0)],		// right
-				['forward', new THREE.Vector3(0, 0, 1)],	// fwd
-				['back', new THREE.Vector3(0, 0, -1)]			// back
-			];
-			*/
 	};
-	
-	/* Movement handled via FirstPersonControls
-	player.move = function(direction, units, cameraManager){
-		switch(direction.toLowerCase()){
-			case 'forward':	
-				lastMovementDirection = direction.toLowerCase();
-				player.z++;
-				//cameraManager.move('z',-1);
-				break;
-			case 'left':
-				player.x--;
-				lastMovementDirection = direction.toLowerCase();
-				//cameraManager.move('x',-1);
-				break;
-			case 'back':
-				lastMovementDirection = direction.toLowerCase();
-				player.z--;
-				//cameraManager.move('z',1);
-				break;
-			case 'right':
-				lastMovementDirection = direction.toLowerCase();
-				player.x++;
-				//cameraManager.move('x',1);
-				break;
-		}
-	}
-	*/
 	
 	player.collisionCheck = function() {
 		'use strict';
     var collisions, i;
     var distance = 1;	
+		var reboundAmount = 1;
 		var playerPosition = cameraManager.controls.getObject().position;
 		
 		// Vector relative to CAMERA SPACE (in front)
@@ -107,9 +54,7 @@ window.player = function(window) {
 			//player.caster.ray.origin.copy( cameraManager.controls.getObject().position );
 
 			var collisions = player.caster.intersectObjects(world.obstacles);
-			
-			var reboundAmount = .4;
-			
+				
 			// Handle collisions
 			if (collisions.length && collisions[0].distance < distance ) {
 				switch(player.collisionRays[i][0]){
