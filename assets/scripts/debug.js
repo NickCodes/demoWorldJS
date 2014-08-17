@@ -19,6 +19,21 @@ var debugObject = function(window){
 		world.scene.add( axisHelper );
 		
 	}
+	
+	// DEBUG scene settings used for working out the kinks!
+	debugObject.defaultSceneSettings = function(){
+		world.defaultDirectionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+		world.defaultDirectionalLight.position.set(0, -11, 0 );
+		world.scene.add( world.defaultDirectionalLight );
+		
+		world.defaultDirectionalLight2 = new THREE.DirectionalLight( 0xffffff, 1 );
+		world.defaultDirectionalLight2.position.set(0, 500, 500 );
+		world.scene.add( world.defaultDirectionalLight2 );
+		
+		debugObject.debugScene = geometryManager.loadModelJSON('assets/models/scene.js');
+		
+		cameraManager.camera.position.y = -8;
+	};
 
 	return debugObject;
 }(window);

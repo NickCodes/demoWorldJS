@@ -29,3 +29,14 @@ var stateManager = function(window) {
 	
 	return stateManager;		
 }(window);
+
+
+/* Thoughts on creating states per application, using general purpose state manager
+var newState={
+	name:"new state name",
+	stateCode: 1,
+	before: function(){ alert('before'); },
+	after: function(){ alert('after'); }
+};
+stateManager.addState(newState);
+*/

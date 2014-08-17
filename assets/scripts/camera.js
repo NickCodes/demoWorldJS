@@ -13,20 +13,36 @@ var cameraManager = function(){
 
 	cameraManager.init = function() {
 		cameraManager.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-	};
+		cameraManager.controls = new THREE.PointerLockControls( cameraManager.camera );
+		world.scene.add( cameraManager.controls.getObject() );
 	
-	// Move the camera along an axis
-	cameraManager.move = function(axis, amount){
-		switch (axis.toLowerCase()){
-			case "x":
-				cameraManager.camera.position.x += amount; break;
-			case "y":
-				cameraManager.camera.position.y += amount; break;
-			case "z":	
-				cameraManager.camera.position.z += amount; break;
+		// Setup pointerlock and callbacks
+		var havePointerLock = 'pointerLockElement' in document ||
+		'moz	PointerLockElement' in document ||
+		'webkitPointerLockElement' in document;
+		if (havePointerLock){
+			world.container.requestPointerLock = world.container.requestPointerLock ||
+				world.container.mozRequestPointerLock ||
+				world.container.webkitRequestPointerLock;
+			// Ask the browser to lock the pointer
+			jQuery(world.container).on('click', function(){ world.container.requestPointerLock(); cameraManager.controls.enabled=1; });
 		}
-	}
-	
+		changeCallback = function(){
+			if (document.pointerLockElement === world.container ||
+				document.mozPointerLockElement === world.container ||
+				document.webkitPointerLockElement === world.container) {
+				document.addEventListener("mousemove", this.moveCallback, false);
+			} else {
+				document.removeEventListener("mousemove", this.moveCallback, false);
+			}
+		};
+		document.addEventListener('pointerlockchange', changeCallback, false);
+		document.addEventListener('mozpointerlockchange', changeCallback, false);
+		document.addEventListener('webkitpointerlockchange', changeCallback, false);
+		document.addEventListener("mousemove", this.moveCallback, false);
+		
+	};
+		
 	return cameraManager;
 }(window);
 

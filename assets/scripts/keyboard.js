@@ -1,4 +1,5 @@
 /* Pseudocode for key control mappings
+	
 	//	Example: create a new set of control mappings
 		standardControls = function() {
 			standardControls = new keyController;
