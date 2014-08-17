@@ -23,6 +23,7 @@ window.player = function(window) {
 		world.scene.add(player.object);
 		*/
 		
+		/*
 		// An array of vectors (rays) to use for collision detection against the map and other geometry
 		player.collisionRays = [
 				['up', new THREE.Vector3(0, -1, 0)],			// up
@@ -32,6 +33,7 @@ window.player = function(window) {
 				['forward', new THREE.Vector3(0, 0, 1)],	// fwd
 				['back', new THREE.Vector3(0, 0, -1)]			// back
 			];
+			*/
 	};
 	
 	/* Movement handled via FirstPersonControls
@@ -64,75 +66,77 @@ window.player = function(window) {
 	player.collisionCheck = function() {
 		'use strict';
     var collisions, i;
-    var distance = 1;				// Maximum distance from the origin before we consider collision
-		
-		// Get FPS controls object (camera) position (will not work with cameraManager.camera.position)
+    var distance = 1;	
 		var playerPosition = cameraManager.controls.getObject().position;
 		
-		// Corrected collision vectors based on camera orientation
-		// In order to preserve "fwd, back, left, right" orientation, we have to set a vector in local camera space,
-		// then transform this based on the world matrix. Then create rays based on fwd, back, left, right based on the new vector
-		// Otherwise, turning 180 degrees collides BACK when you move FWD and left when you move right, etc
-		
-		// Camera direction vector, locally always 0,0,-1
-		var pLocal = new THREE.Vector3( 0, 0, -1 );
+		// Vector relative to CAMERA SPACE (in front)
+		var pLocal = new THREE.Vector3( 0, 0, -1 );		
+		// Transform the relative camera space above into WORLD SPACE
 		var pWorld = pLocal.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
-		// Subtract camera position from world vector and normalize
+		// Construct the collision ray vector
 		var dir = pWorld.sub( cameraManager.controls.getObject().position ).normalize();
 		
-		// TODO - Create rays for THIS test based on the new vector information above, then run collision loop
-		//
-			// An array of vectors (rays) to use for collision detection against the map and other geometry
+		// Get collision vectors relative to current camera location and orientation
+		var pLeft = new THREE.Vector3( -1, 0, 0 );		
+		var pLeftWorld = pLeft.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
+		var lLeft = pLeftWorld.sub( cameraManager.controls.getObject().position );
+		var pRight = new THREE.Vector3( 1, 0, 0 );		
+		var pRightWorld = pRight.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
+		var lRight = pRightWorld.sub( cameraManager.controls.getObject().position );
+		var pForward = new THREE.Vector3( 0, 0, -1 );		
+		var pForwardWorld = pForward.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
+		var lForward = pForwardWorld.sub( cameraManager.controls.getObject().position );
+		var pBack = new THREE.Vector3( 0, 0, 1 );		
+		var pBackWorld = pBack.applyMatrix4( cameraManager.controls.getObject().matrixWorld );
+		var lBack = pBackWorld.sub( cameraManager.controls.getObject().position );
+		
 		player.collisionRays = [
-				['up', new THREE.Vector3(0, -1, 0)],			// up
-				['down', new THREE.Vector3(0, -1, 0)],		// down
-				['left', new THREE.Vector3(-1, 0, 0)],		// left
-				['right', new THREE.Vector3(1, 0, 0)],		// right
-				['forward', new THREE.Vector3(0, 0, 1)],	// fwd
-				['back', new THREE.Vector3(0, 0, -1)]			// back
-			];
-			
+			['left', lLeft],				
+			['right', lRight],			
+			['forward', lForward],	
+			['back', lBack],				
+		];
+		
+		// Check each ray for collision
     for (i = 0; i < player.collisionRays.length; i += 1) {
-			player.caster = new THREE.Raycaster();
-			
-			//var pos = new THREE.Vector3( player.object.position.x,player.object.position.y+3, player.object.position.z ); // was -3
-			//player.caster.set(pos, player.collisionRays[i][1].normalize());
-			
-			// Cast rays from the current camera position, offsetting Y by 3 so the ray is cast ABOVE the ground if standing on the ground
+			player.caster = new THREE.Raycaster();				
+			// Get camera controller position, set current ray from that position and check collisions
 			var pos = new THREE.Vector3( playerPosition.x, playerPosition.y-7, playerPosition.z ); 
 			player.caster.set(pos, player.collisionRays[i][1].normalize());
-			
-			//Get vetctor of movement
-			//var vector = new THREE.Vector3();
-			//console.log(cameraManager.controls.getDirection( vector ));
-			
+
+			//player.caster.ray.origin.copy( cameraManager.controls.getObject().position );
+
 			var collisions = player.caster.intersectObjects(world.obstacles);
-				
-			if (collisions.length && collisions[0].distance < distance ) {
 			
+			var reboundAmount = .4;
+			
+			// Handle collisions
+			if (collisions.length && collisions[0].distance < distance ) {
 				switch(player.collisionRays[i][0]){
 					case 'forward':
 						console.log('collision detected ' + player.collisionRays[i][0]);
-						player.object.position.z -= .2;
+						//cameraManager.controls.getObject().position.z += 2;
+						cameraManager.controls.getObject().translateZ(reboundAmount);
 						break;
 					case 'back':
 						console.log('collision detected ' + player.collisionRays[i][0]);
-						player.object.position.z += .2;
+						//cameraManager.controls.getObject().position.z -= 2;
+						cameraManager.controls.getObject().translateZ(-reboundAmount);
 						break;
 					case 'left':
 						console.log('collision detected ' + player.collisionRays[i][0]);
-						player.object.position.x += .2;
+						//cameraManager.controls.getObject().position.x += 2;
+						cameraManager.controls.getObject().translateX(reboundAmount);
 						break;
 					case 'right':
 						console.log('collision detected ' + player.collisionRays[i][0]);
-						player.object.position.x -= .2;
+						//cameraManager.controls.getObject().position.x -= 2;
+						cameraManager.controls.getObject().translateX(-reboundAmount);
 						break;
 					case 'down':
 						console.log('collision detected ' + player.collisionRays[i][0]);
-						player.object.position.y += .1 ;
 						break;
 				}
-			
 			} // End collision handling
 		} // End for each ray check loop
 	}	// End collision check

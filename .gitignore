@@ -10,6 +10,7 @@
 /assets/models/
 /assets/images/
 /assets/lib/
+!/assets/lib/*controls.js
 
 !/assets/styles
 !/assets/scripts

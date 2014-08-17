@@ -63,6 +63,27 @@
 				
 				
 				
+				/*	TODO - visually map collision rays for easier understanding
+				  function v(x,y,z){ 
+						return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+					}
+					
+					var lineGeo = new THREE.Geometry();
+					lineGeo.vertices.push(
+						v(-50, 0, 0), v(50, 0, 0),
+						v(0, -50, 0), v(0, 50, 0),
+						v(0, 0, -50), v(0, 0, 50)
+					);
+					var lineMat = new THREE.LineBasicMaterial({
+						color: 0x000000, lineWidth: 1});
+					var line = new THREE.Line(lineGeo, lineMat);
+					line.type = THREE.Lines;
+					scene.add(line);
+				*/
+				
+				
+				
+				
 				// Collision geometry
 				world.obstacles = [];
 
@@ -106,11 +127,12 @@
 					requestAnimFrame(animloop);
 					var timedelta = world.gameClock.getDelta();
 					// Pointer lock update
+					player.collisionCheck();	// Camera collision check
 					cameraManager.controls.update(timedelta);
 					// Update fps / stats
 					debugObject.stats.update();
 
-					player.collisionCheck();	// Camera collision check
+					
 					
 					/* Old player control code - using camera as player now 
 					// TODO - remove
